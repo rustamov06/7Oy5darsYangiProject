@@ -12,21 +12,31 @@
               <div class="banner-ad large bg-info block-1">
                 <div class="swiper main-swiper">
                   <div class="swiper-wrapper">
-                    {% for category in categories %}
-                    <div class="swiper-slide">
-                      <div class="row banner-content p-5">
-                        <div class="content-wrapper col-md-7">
-                          <div class="categories my-1">{{category.name}}</div>
-                          <h3 class="display-4">Fresh Smoothie & Summer Juice</h3>
-                          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dignissim massa diam elementum.</p>
-                          <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 px-4 py-3 mt-3">Shop Now</a>
-                        </div>
-                        <div class="img-wrapper col-md-5">
-                          <img src="{{ category.image.url }}" class="img-fluid">
-                        </div>
-                      </div>
-                    </div>
-                    {% endfor %}
+{% for product in product_max_discount %}
+    {% if product.discount > 0 %}
+        <div class="swiper-slide">
+            <div class="row banner-content p-5">
+                <div class="content-wrapper col-md-7">
+                    <div class="categories my-1">{{ product.category.name }}</div>
+                    <h3 class="display-4">{{ product.name }}</h3>
+                    <p>{{ product.description }}</p>
+                    <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 px-4 py-3 mt-3">
+                        Shop Now
+                    </a>
+                </div>
+                <div class="img-wrapper col-md-5">
+                    {% if product.images.all %}
+                        <img src="{{ product.images.first.image.url }}" class="img-fluid" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="/static/default-image.jpg" class="img-fluid" alt="No Image">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
+
                   </div>
                   <!-- Swiper pagination qo'shish -->
                   <div class="swiper-pagination"></div>
@@ -94,7 +104,7 @@
             <div class="category-carousel swiper">
               <div class="swiper-wrapper">
                   {% for category in categories %}
-                  <a href="index.html" class="nav-link category-item swiper-slide">
+                  <a href="{% url 'category_detail' category.slug %}" class="nav-link category-item swiper-slide">
                   <img src="{{category.image.url}}" alt="Category Thumbnail">
                   <h3 class="category-title">{{category.name}}</h3>
                   </a>
@@ -130,29 +140,29 @@
             <div class="tab-pane fade show active" id="nav-all" role="tabpanel">
               <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                 {% for product in products %}
-                  <div class="col">
-                    <a href="{% url 'product_detail' product.slug %}" class="product-item card border-0 shadow-sm text-decoration-none">
-                      <div class="position-relative">
-                        <span class="badge bg-success position-absolute top-0 start-0 m-2">{{ product.name }}</span>
-                        <div id="imageSlider-{{ product.slug }}" class="carousel slide" data-bs-ride="carousel">
-                          <div class="carousel-inner">
-                            {% for image in product.images.all %}
-                              <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                <img src="{{ image.image.url }}" class="d-block w-100 rounded-top" alt="{{ product.name }}">
-                              </div>
-                            {% endfor %}
-                          </div>
-                        </div>
-                      </div>
-                      <div class="card-body text-center">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">
-                          <span class="price fw-bold">${{ product.price }}/{{ product.volume }}</span>
-                        </p>
+                 <div class="col-md-3 col-sm-6 mb-4">
+  <a href="{% url 'product_detail' product.slug %}" class="card border-0 shadow-sm text-decoration-none h-100 d-flex flex-column">
+    <div class="position-relative">
+      <span class="badge bg-success position-absolute top-0 start-0 m-2">{{ product.name }}</span>
+      <div id="imageSlider-{{ product.id }}" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          {% for image in product.images.all %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <img src="{{ image.image.url }}" class="d-block w-100 rounded-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card-body text-center d-flex flex-column flex-grow-1 justify-content-between">
+      <h5 class="card-title text-truncate">{{ product.name }}</h5>
+      <p class="card-text">
+        <span class="price fw-bold">${{ product.price }}/{{ product.volume }}</span>
+      </p>
+    </div>
+  </a>
+</div>
 
-                      </div>
-                    </a>
-                  </div>
                 {% endfor %}
               </div>
             </div>
@@ -162,22 +172,23 @@
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                   {% for product in products %}
                     {% if product.category == category %}
-                      <div class="col">
-                        <a href="{% url 'product_detail' product.slug %}" class="product-item card border-0 shadow-sm text-decoration-none">
-                          <div class="position-relative">
-                            <span class="badge bg-success position-absolute top-0 start-0 m-2">{{ product.name }}</span>
-                            <div id="imageSlider-{{ product.slug }}" class="carousel slide" data-bs-ride="carousel">
-                              <div class="carousel-inner">
-                                {% for image in product.images.all %}
-                                  <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                    <img src="{{ image.image.url }}" class="d-block w-100 rounded-top" alt="{{ product.name }}">
-                                  </div>
-                                {% endfor %}
-                              </div>
-                            </div>
-                          </div>
-                        </a>
-                      </div>
+               <div class="col-md-3 col-sm-6 mb-4">
+  <a href="{% url 'product_detail' product.slug %}" class="card border-0 shadow-sm text-decoration-none h-100 d-flex flex-column">
+    <div class="position-relative">
+      <span class="badge bg-success position-absolute top-0 start-0 m-2">{{ product.name }}</span>
+      <div id="imageSlider-{{ product.slug }}" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          {% for image in product.images.all %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <img src="{{ image.image.url }}" class="d-block w-100 rounded-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
                     {% endif %}
                   {% endfor %}
                 </div>
@@ -336,7 +347,4 @@
       </div>
     </section>
 </div>
-
-
-
     {% endblock content %}

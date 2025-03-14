@@ -2,22 +2,17 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from .form import CommentFrom
 from .models import Product, Category, ProductImage, Comment
-
-
-
-
-
+from django.db.models import Max, Min, Count, Sum, Avg
+from django.core.paginator import Paginator
 
 
 class IndexView(ListView):
     queryset = Product.objects.all()[:10]
     template_name = "index.html"
     context_object_name = 'products'
-
-
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data()
@@ -26,11 +21,13 @@ class IndexView(ListView):
         for image in ProductImage.objects.all():
             images.append(image.image.url)
         context['images'] = images
+        context['product_max_discount'] = Product.objects.aggregate(Max('discount'))
+        context['product_max_discount'] = Product.objects.filter(discount__gt=0, slug__isnull=False).order_by('-discount')[:2]
+
         return context
 
 
 class ProductDetailView(View):
-    """Mahsulot sahifasi va kommentlarni boshqarish"""
 
     def get(self, request, slug):
         product = get_object_or_404(Product, slug=slug)  # Slug orqali olish
@@ -41,7 +38,6 @@ class ProductDetailView(View):
 
     @method_decorator(login_required)
     def post(self, request, slug):
-        """Faqat tizimga kirgan foydalanuvchilar izoh qoldira, o‘chira va tahrirlaya oladi"""
         product = get_object_or_404(Product, slug=slug)
         action = request.POST.get("action")
 
@@ -67,3 +63,29 @@ class ProductDetailView(View):
                 comment.delete()
 
         return redirect("product_detail", slug=product.slug)
+
+class CategoryDetailView(DetailView):
+    model = Category
+    template_name = 'category_detail.html'
+    context_object_name = 'category'
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        subcategories = Category.objects.filter(parent=self.object)
+
+        if subcategories.exists():
+            products = Product.objects.filter(category__in=subcategories)
+        else:
+            products = Product.objects.filter(category=self.object)
+
+        paginator = Paginator(products, 10)
+        page_number = self.request.GET.get('page')
+        products_page = paginator.get_page(page_number)
+
+        context['subcategories'] = subcategories
+        context['products'] = products_page
+
+        return context

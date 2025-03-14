@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* Sahifa umumiy dizayni */
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Kategoriya sarlavhasi */
+    .category-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Subkategoriyalar bloki */
+    .subcategory-list {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .subcategory-list a {
+        display: inline-block;
+        background: #6c757d;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        margin: 5px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .subcategory-list a:hover {
+        background: #343a40;
+    }
+
+    /* Mahsulot kartochkalari */
+    .product-card {
+        border-radius: 15px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-bottom: 5px solid #f8f9fa;
+    }
+
+    .product-body {
+        padding: 20px;
+    }
+
+    .product-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .product-description {
+        font-size: 1rem;
+        color: #666;
+    }
+
+    .product-discount {
+        font-size: 1.2rem;
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .shop-btn {
+        background: #007bff;
+        color: #fff;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .shop-btn:hover {
+        background: #0056b3;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .pagination a {
+        padding: 10px 15px;
+        background: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 5px;
+        transition: 0.3s;
+    }
+
+    .pagination a:hover {
+        background: #0056b3;
+    }
+
+    .pagination .current {
+        padding: 10px 15px;
+        background: #343a40;
+        color: #fff;
+        border-radius: 5px;
+        margin: 5px;
+    }
+</style>
+
+<!-- Kategoriya sarlavhasi -->
+<h2 class="category-title">{{ category.name }}</h2>
+
+<!-- Subkategoriyalar -->
+{% if subcategories %}
+    <div class="subcategory-list">
+        {% for subcategory in subcategories %}
+            <a href="{% url 'category_detail' subcategory.slug %}">{{ subcategory.name }}</a>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Mahsulotlar -->
+<div class="container">
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="product-card">
+                    <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}">
+                    <div class="product-body">
+                        <h5 class="product-title">{{ product.name }}</h5>
+                        <p class="product-description">{{ product.description }}</p>
+                        {% if product.discount > 0 %}
+                            <p class="product-discount">Chegirma: {{ product.discount }}%</p>
+                        {% endif %}
+                        <a href="{% url 'product_detail' product.slug %}" class="shop-btn">Batafsil</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center">Bu kategoriyada mahsulot yo‘q.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="pagination">
+    {% if products.has_previous %}
+        <a href="?page=1">&laquo; Birinchi</a>
+        <a href="?page={{ products.previous_page_number }}">Oldingi</a>
+    {% endif %}
+
+    <span class="current">Sahifa {{ products.number }} / {{ products.paginator.num_pages }}</span>
+
+    {% if products.has_next %}
+        <a href="?page={{ products.next_page_number }}">Keyingi</a>
+        <a href="?page={{ products.paginator.num_pages }}">Oxirgi &raquo;</a>
+    {% endif %}
+</div>
+
+
+{% endblock content %}
