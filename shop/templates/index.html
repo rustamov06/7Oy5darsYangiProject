@@ -37,6 +37,7 @@
 {% endfor %}
 
 
+
                   </div>
                   <!-- Swiper pagination qo'shish -->
                   <div class="swiper-pagination"></div>
@@ -78,6 +79,21 @@
     {%endblock kirish%}
 
     {% block content %}
+
+<!--<div class="filter-container">-->
+<!--    <form method="GET" id="price-filter-form">-->
+<!--        <div class="range-container">-->
+<!--            <label for="min_price">Minimal narx: <span id="min_price_value">{{ min_price }}</span> so‘m</label>-->
+<!--            <input type="range" id="min_price" name="min_price" min="{{ min_price }}" max="{{ max_price }}" value="{{ min_price }}">-->
+
+<!--            <label for="max_price">Maksimal narx: <span id="max_price_value">{{ max_price }}</span> so‘m</label>-->
+<!--            <input type="range" id="max_price" name="max_price" min="{{ min_price }}" max="{{ max_price }}" value="{{ max_price }}">-->
+<!--        </div>-->
+
+<!--        <button type="submit">Filterlash</button>-->
+<!--    </form>-->
+<!--</div>-->
+
 
     <section class="py-5 overflow-hidden">
       <div class="container-fluid">
@@ -347,4 +363,20 @@
       </div>
     </section>
 </div>
+<script>
+    const minPriceInput = document.getElementById('min_price');
+    const maxPriceInput = document.getElementById('max_price');
+    const minPriceValue = document.getElementById('min_price_value');
+    const maxPriceValue = document.getElementById('max_price_value');
+
+    minPriceInput.addEventListener('input', function() {
+        minPriceValue.textContent = this.value;
+    });
+
+    maxPriceInput.addEventListener('input', function() {
+        maxPriceValue.textContent = this.value;
+    });
+</script>
+
+
     {% endblock content %}

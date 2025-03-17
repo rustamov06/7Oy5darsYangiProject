@@ -16,15 +16,32 @@ class IndexView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data()
+
         context['categories'] = Category.objects.filter(parent=None)
         images = []
         for image in ProductImage.objects.all():
             images.append(image.image.url)
         context['images'] = images
         context['product_max_discount'] = Product.objects.aggregate(Max('discount'))
-        context['product_max_discount'] = Product.objects.filter(discount__gt=0, slug__isnull=False).order_by('-discount')[:2]
+        context['product_max_discount'] = Product.objects.filter(discount__gt=0, slug__isnull=False).order_by('-discount')
 
+        context['min_price'] = Product.objects.aggregate(Min('price'))['price__min']
+        context['max_price'] = Product.objects.aggregate(Max('price'))['price__max']
         return context
+
+
+    def get_queryset(self):
+            queryset = Product.objects.all()
+
+            min_price = self.request.GET.get('min_price')
+            max_price = self.request.GET.get('max_price')
+
+            if min_price and max_price:
+                queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
+
+            return queryset
+
+
 
 
 class ProductDetailView(View):
@@ -89,3 +106,5 @@ class CategoryDetailView(DetailView):
         context['products'] = products_page
 
         return context
+
+
