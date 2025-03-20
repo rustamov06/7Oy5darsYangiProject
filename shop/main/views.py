@@ -3,7 +3,6 @@ from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
-from .form import CommentFrom
 from .models import Product, Category, ProductImage, Comment
 from django.db.models import Max, Min, Count, Sum, Avg
 from django.core.paginator import Paginator
@@ -43,13 +42,19 @@ class IndexView(ListView):
 
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from .models import Product, Comment
+from .form import CommentForm
 
 class ProductDetailView(View):
 
     def get(self, request, slug):
-        product = get_object_or_404(Product, slug=slug)  # Slug orqali olish
+        product = get_object_or_404(Product, slug=slug)
         comments = Comment.objects.filter(product=product)
-        form = CommentFrom()
+        form = CommentForm()
         context = {"product": product, "comments": comments, "form": form}
         return render(request, "product_detail.html", context)
 
@@ -59,11 +64,12 @@ class ProductDetailView(View):
         action = request.POST.get("action")
 
         if action == "create":
-            form = CommentFrom(request.POST)
+            form = CommentForm(request.POST)
             if form.is_valid():
                 comment = form.save(commit=False)
                 comment.product = product
                 comment.user = request.user
+                comment.rating = request.POST.get("rating")
                 comment.save()
 
         elif action == "update":
@@ -71,6 +77,7 @@ class ProductDetailView(View):
             comment = get_object_or_404(Comment, id=comment_id, product=product)
             if request.user == comment.user:
                 comment.text = request.POST.get("text")
+                comment.rating = request.POST.get("rating")
                 comment.save()
 
         elif action == "delete":
