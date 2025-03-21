@@ -2,8 +2,6 @@ from django.db import models
 from django.db.models import PROTECT
 from django.contrib.auth.models import User
 
-
-
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
@@ -15,13 +13,11 @@ class Category(models.Model):
             return self.name
         return f"{self.parent.name}: {self.name}"
 
-
 VOLUMES = {
-    "kg":"Kilogram",
-    "l":"Litr",
-    "ta":"Dona"
+    "kg": "Kilogram",
+    "l": "Litr",
+    "ta": "Dona"
 }
-
 
 class Product(models.Model):
     name = models.CharField(max_length=250)
@@ -35,7 +31,6 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class ProductImage(models.Model):
     image = models.ImageField(upload_to="product/image/")
@@ -51,6 +46,37 @@ class Comment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     rating = models.IntegerField(default=5)
 
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"
+
+class City(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return f"{self.user.name}"
+        return self.name
+
+class Delivery(models.Model):
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    estimated_days = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.city.name} - {self.price}$"
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    delivery = models.ForeignKey(Delivery, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"Order {self.id} - {self.user.username}"
+
+class OrderProduct(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_products')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.product.name} - {self.quantity}x"
