@@ -3,7 +3,7 @@ from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
-from .models import Product, Category, ProductImage, Comment
+from .models import Product, Category, ProductImage, Comment, OrderProduct, Order, Delivery, City, Customer
 from django.db.models import Max, Min, Count, Sum, Avg
 from django.core.paginator import Paginator
 
@@ -115,3 +115,43 @@ class CategoryDetailView(DetailView):
         return context
 
 
+
+
+
+class Cart(View):
+    def get(self, request):
+        pass
+
+
+
+class ToCart(View):
+    """ Savatga qo'shish va uni o'chirish  """
+    def get(self, request, product_slug, action):
+        customer, created = Customer.objects.get_or_create(
+            user=request.user,
+
+        )
+        order, created = Order.objects.get_or_create(
+            customer=customer,
+        )
+        if action == 'add':
+            try:
+                order_product = OrderProduct.objects.get(order=order, product__slug=product_slug)
+                pass
+            except:
+                if  request.method == "POST":
+                    quantity = request.POST.get('quantity')
+                    order_product = OrderProduct.objects.create(order=order, product=Product.objects.get(slug=product_slug), quantity=quantity)
+                else:
+                    order_product = OrderProduct.objects.create(order=order, product=Product.objects.get(slug=product_slug), quantity=1)
+        else:
+            pass
+        page = request.META.get('HTTP_REFERER', 'index')
+        return redirect(page)
+    def post(self, request, product_slug, action):
+        return self.get(request, product_slug, action)
+
+
+class Checkout(View):
+    def get(self, request):
+        pass
